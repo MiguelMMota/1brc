@@ -14,14 +14,12 @@
 #  limitations under the License.
 #
 
-# TODO:
-# 1. Read File line by line
-# 2. Process each line as straightforwardly as possible
-# 3. Aggregate, sort, and print results
-
-
-
-from collections import defaultdict
+# TODO: efficiency ideas:
+# 1. Pypy
+# 2. Handle floats as ints
+# 3. Custom hashing
+# 4. Avoid branch predictions with high odds of failure
+# 5. SIMD
 
 
 def process_line(line: str) -> tuple[str, float]:
@@ -30,20 +28,26 @@ def process_line(line: str) -> tuple[str, float]:
 
 
 def main() -> None:
-    data = defaultdict(list)
+    data = {}
     with open("measurements.txt", "r") as f:
-        lines = f.readlines()
-
-        for line in lines:
+        for line in f:
             station, temperature = process_line(line)
-            data[station].append(temperature)
+            if station in data:
+                data[station]["min"] = min(temperature, data[station]["min"])
+                data[station]["max"] = max(temperature, data[station]["max"])
+                data[station]["sum"] = temperature + data[station]["sum"]
+                data[station]["count"] += 1
+            else:
+                data[station] = {
+                    "min": temperature,
+                    "max": temperature,
+                    "sum": temperature,
+                    "count": 1,
+                }
 
     aggregate_data = {}
-    for station, temperatures in data.items():
-        _min = min(temperatures)
-        _mean = round(sum(temperatures) / len(temperatures), 1)
-        _max = max(temperatures)
-        aggregate_data[station] = f"{_min}|{_mean}|{_max}"
+    for station, datum in data.items():
+        aggregate_data[station] = f"{datum['min']}|{datum['sum'] / datum['count']:.1f}|{datum['max']}"
 
     print(dict(sorted(aggregate_data.items())))
 
