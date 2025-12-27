@@ -15,39 +15,39 @@
 #
 
 # TODO: efficiency ideas:
-# 1. Pypy
+# 1. mmap
 # 2. Handle floats as ints
 # 3. Custom hashing
 # 4. Avoid branch predictions with high odds of failure
 # 5. SIMD
-
-
-def process_line(line: str) -> tuple[str, float]:
-    station, temperature = line.split(";")
-    return station, float(temperature)
+# 6. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
+# 7. More efficient dict sorting?
 
 
 def main() -> None:
     data = {}
     with open("measurements.txt", "r") as f:
         for line in f:
-            station, temperature = process_line(line)
+            station, temperature = line.split(";")
+            temperature = float(temperature)
             if station in data:
-                data[station]["min"] = min(temperature, data[station]["min"])
-                data[station]["max"] = max(temperature, data[station]["max"])
-                data[station]["sum"] = temperature + data[station]["sum"]
-                data[station]["count"] += 1
+                data[station] = (
+                    min(temperature, data[station][0]),
+                    max(temperature, data[station][1]),
+                    temperature + data[station][2],
+                    data[station][3] + 1,
+                )
             else:
-                data[station] = {
-                    "min": temperature,
-                    "max": temperature,
-                    "sum": temperature,
-                    "count": 1,
-                }
+                data[station] = (
+                    temperature,
+                    temperature,
+                    temperature,
+                    1,
+                )
 
     aggregate_data = {}
-    for station, datum in data.items():
-        aggregate_data[station] = f"{datum['min']}|{datum['sum'] / datum['count']:.1f}|{datum['max']}"
+    for station, (_min, _max, _sum, _count) in data.items():
+        aggregate_data[station] = f"{_min}|{_sum/_count:.1f}|{_max}"
 
     print(dict(sorted(aggregate_data.items())))
 
