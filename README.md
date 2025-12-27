@@ -15,3 +15,4 @@ My take on the 1BRC challenge in Python.
 | Single lookup when updating station data | 2:42.68 | Read station data once and mutate it, instead of reading each element separately, which incurs multiple dict lookups | ✅ |
 | Set dict default value instead of checking if key is present | 2:30.51 | This saves us an additional lookup for each station, and a branching path | ✅ |
 | Swap order of operands | 2:35.04 | This might have resulted in optimisations by the JIT compiler | ❌ |
+| Replace `min()`/`max()` with `if` statements | ... | Avoid extra function call and memory allocations, and allow CPU to optimise branch paths that will rarely be taken  | ❌ |

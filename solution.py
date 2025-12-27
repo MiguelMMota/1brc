@@ -38,8 +38,8 @@ def main() -> None:
             entry = data[station]
             entry[0] = min(temperature, entry[0])
             entry[1] = max(temperature, entry[1])
-            entry[2] = temperature + entry[2]
-            entry[3] = entry[3] + 1
+            entry[2] += temperature
+            entry[3] += 1
 
     aggregate_data = {}
     for station, (_min, _max, _sum, _count) in data.items():
