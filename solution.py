@@ -24,22 +24,34 @@
 # 7. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
 # 8. More efficient data aggregation and dict sorting?
 
-import math
 from collections import defaultdict
+import math
+import mmap
 
 
 def main() -> None:
     data = defaultdict(lambda: [math.inf, -math.inf, 0, 0])
-    with open("measurements.txt", "r") as f:
-        for line in f:
-            station, temperature = line.split(";")
-            temperature = float(temperature)
 
-            entry = data[station]
-            entry[0] = min(temperature, entry[0])
-            entry[1] = max(temperature, entry[1])
-            entry[2] += temperature
-            entry[3] += 1
+    with open("measurements.txt", "r+b") as f:
+        with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+            start = 0
+            while True:
+                end = mm.find(b'\n', start)
+                if end == -1:
+                    break
+
+                line = mm[start:end]
+                start = end + 1
+
+                semicolon_pos = line.find(b';')
+                station = line[:semicolon_pos].decode('utf-8')
+                temperature = float(line[semicolon_pos+1:])
+
+                entry = data[station]
+                entry[0] = min(temperature, entry[0])
+                entry[1] = max(temperature, entry[1])
+                entry[2] += temperature
+                entry[3] += 1
 
     aggregate_data = {}
     for station, (_min, _max, _sum, _count) in data.items():
