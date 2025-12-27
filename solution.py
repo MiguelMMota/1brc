@@ -15,12 +15,11 @@
 #
 
 # TODO: efficiency ideas:
-# 1. Handle floats as ints
-# 2. Custom hashing
-# 3. Avoid branch predictions with high odds of failure
-# 4. SIMD
-# 5. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
-# 6. More efficient data aggregation and dict sorting?
+# 1. Custom hashing
+# 2. Avoid branch predictions with high odds of failure
+# 3. SIMD
+# 4. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
+# 5. More efficient data aggregation and dict sorting?
 
 from collections import defaultdict
 import math
@@ -43,7 +42,24 @@ def main() -> None:
 
                 semicolon_pos = line.find(b';')
                 station = line[:semicolon_pos]
-                temperature = float(line[semicolon_pos+1:])
+                
+                # Handle temperature as a sequence of bytes to avoid treating it as a float
+                temp_bytes = line[semicolon_pos+1:]
+                sign = 1
+                offset = 0
+                result = 0
+                if temp_bytes[0] == 45:  # ord(b'-')
+                    sign = -1
+                    offset = 1
+
+                for b in temp_bytes[offset:]:
+                    if b == 46:  # ord(b'.')
+                        continue
+                
+                    result *= 10
+                    result += b - 48  # ord(b'0')
+
+                temperature = result * sign
 
                 entry = data[station]
                 entry[0] = min(temperature, entry[0])
@@ -53,7 +69,7 @@ def main() -> None:
 
     aggregate_data = {}
     for station, (_min, _max, _sum, _count) in data.items():
-        aggregate_data[station.decode('utf-8')] = f"{_min}|{_sum/_count:.1f}|{_max}"
+        aggregate_data[station.decode('utf-8')] = f"{0.1*_min:.1f}|{0.1*_sum/_count:.1f}|{0.1*_max:.1f}"
 
     print(dict(sorted(aggregate_data.items())))
 

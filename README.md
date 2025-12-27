@@ -20,6 +20,7 @@ My take on the 1BRC challenge in Python.
 | Hoist list access | 2:39.06 | | ❌ |
 | mmap | 2:10.87 | | ✅ |
 | Only decode station name into utf-8 when aggregating results | 2:01.56 | We don't need to decode it every line | ✅ |
+| Treat floats as ints | 1:55.12 | We're casting the temperature bytes to float every line, but we know the values follow a strict format. This allows us to treat them as ints, and convert back to single decimal place floats when printing results. | ✅ |
 
 ## Take-aways
 
