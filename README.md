@@ -19,6 +19,7 @@ My take on the 1BRC challenge in Python.
 | Mutate objects in place | 2:31.88 | Avoid extra function call and memory allocations, and allow CPU to optimise branch paths that will rarely be taken  | ✅ |
 | Hoist list access | 2:39.06 | | ❌ |
 | mmap | 2:10.87 | | ✅ |
+| Only decode station name into utf-8 when aggregating results | 2:01.56 | We don't need to decode it every line | ✅ |
 
 ## Take-aways
 
