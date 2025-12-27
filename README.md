@@ -25,9 +25,11 @@ My take on the 1BRC challenge in Python.
 | Store value directly in `temperature` instead of temporarily using `result` | 1:44.45 | This also includes a change to set the sign of `temperature` by multiplying it in place, instead of assigning from `result * sign`. Hard to say how much of the performance boost is due to noise, but it seems a sound change anyways | ✅ |
 | Initialise temperature directly to the first digit's value, instead of 0 | 1:33.54 | This allows us to skip an iteration when we loop over the bytes. A separate measurement gave ~1:39, so measurements should be taken with an extra grain of salt from now on | ✅ |
 | Use arithmetic instead of if-statement to determine sign and offset | 1:32.39 | Since the first byte is always either b'-' (45) or b'0' - b'9' (48-57), we can determine the sign and offset with a series of arithmetic operations, removing a branch that is hard for the CPU to predict correctly (assuming there's a roughly equal amount of negative and positive temperatures in the dataset) | ✅ |
+| Use mm.readline | 1:08.49 | It's much faster than trying to find "\n" | ✅ |
 | | | | |
 
 ## Take-aways
 
 1. We don't get to do some optimisations on account of internal optimisations that pypy's JIT compiler already does. For example: swap order of operands, replacing `min()`/`max()` with branched paths that will frequently be skipped
 2. `perf` isn't very useful with pypy's JIT compiler because a lot of the code is already optimised and it's difficult to gather insights from the report
+3. SIMD isn't valuable in this case, as the Python overhead would negate SIMD gains

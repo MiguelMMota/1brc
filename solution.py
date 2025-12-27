@@ -16,31 +16,28 @@
 
 # TODO: efficiency ideas:
 # 1. Custom hashing
-# 2. Avoid branch predictions with high odds of failure
-# 3. SIMD
-# 4. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
-# 5. More efficient data aggregation and dict sorting?
-# 6. Use string formatting to print ints as single decimal place floats instead of doing multiplication
+# 2. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
+# 3. More efficient data aggregation and dict sorting?
+# 4. Use string formatting to print ints as single decimal place floats instead of doing multiplication
 
 from collections import defaultdict
+from copy import deepcopy
 import math
 import mmap
+import os
+
+
+CPU_COUNT = os.cpu_count()
+MMAP_PAGE_SIZE = os.sysconf("SC_PAGE_SIZE")
+DEFAULT_DATUM = [math.inf, -math.inf, 0, 0]
 
 
 def main() -> None:
-    data = defaultdict(lambda: [math.inf, -math.inf, 0, 0])
+    data = defaultdict(lambda: deepcopy(DEFAULT_DATUM))
 
     with open("measurements.txt", "r+b") as f:
         with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
-            start = 0
-            while True:
-                end = mm.find(b'\n', start)
-                if end == -1:
-                    break
-
-                line = mm[start:end]
-                start = end + 1
-
+            for line in iter(mm.readline, b""):
                 semicolon_pos = line.find(b';')
                 station = line[:semicolon_pos]
                 
@@ -58,11 +55,11 @@ def main() -> None:
                 # TODO: this will now only ever go over the digit before the decimal place if there are two digits
                 # before the decimal place. I wonder if there's a better way to do this, instead of slicing the list
                 # for a single iteration.
-                for b in temp_bytes[offset+1:-2]:
+                for b in temp_bytes[offset+1:-3]:  # lines end with ".[digit]\n" (or r"\.\d\n"), which we want to ignore for now
                     temperature += b - 48  # ord(b'0')
                     temperature *= 10
 
-                temperature += temp_bytes[-1] - 48  # ord(b'0')
+                temperature += temp_bytes[-2] - 48  # ord(b'0'). We check the penultimate character, because the line ends with "\n"
                 temperature *= sign
 
                 entry = data[station]
