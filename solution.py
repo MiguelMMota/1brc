@@ -48,20 +48,23 @@ def main() -> None:
                 temp_bytes = line[semicolon_pos+1:]
                 sign = 1
                 offset = 0
-                result = 0
 
-                # TODO: can we rewrite this omit the if-statement? And will that make a difference in performance?
+                # TODO: can we rewrite this to omit the if-statement? And will that make a difference in performance?
                 if temp_bytes[0] == 45:  # ord(b'-')
                     sign = -1
                     offset = 1
 
-                for b in temp_bytes[offset:-2]:
-                    result += b - 48  # ord(b'0')
-                    result *= 10
+                temperature = (temp_bytes[offset] - 48) * 10
 
-                result += temp_bytes[-1] - 48  # ord(b'0')
+                # TODO: this will now only ever go over the digit before the decimal place if there are two digits
+                # before the decimal place. I wonder if there's a better way to do this, instead of slicing the list
+                # for a single iteration.
+                for b in temp_bytes[offset+1:-2]:
+                    temperature += b - 48  # ord(b'0')
+                    temperature *= 10
 
-                temperature = result * sign
+                temperature += temp_bytes[-1] - 48  # ord(b'0')
+                temperature *= sign
 
                 entry = data[station]
                 entry[0] = min(temperature, entry[0])

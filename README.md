@@ -22,6 +22,10 @@ My take on the 1BRC challenge in Python.
 | Only decode station name into utf-8 when aggregating results | 2:01.56 | We don't need to decode it every line | ✅ |
 | Treat floats as ints | 1:55.12 | We're casting the temperature bytes to float every line, but we know the values follow a strict format. This allows us to treat them as ints, and convert back to single decimal place floats when printing results. | ✅ |
 | Implicitly skip the "." character | 1:45.30 | Instead of comparing each byte to the floating point character, iterate all bytes up to the last two, then add the last byte, which corresponding to the number after the decimal point | ✅ |
+| Store value directly in `temperature` instead of temporarily using `result` | 1:44.45 | This also includes a change to set the sign of `temperature` by multiplying it in place, instead of assigning from `result * sign`. Hard to say how much of the performance boost is due to noise, but it seems a sound change anyways | ✅ |
+| Initially temperature directly to the first digit's value, instead of 0 | 1:33.54 | This allows us to skip an iteration when we loop over the bytes. A separate measurement gave ~1:39, so measurements should be taken with an extra grain of salt from now on | ✅ |
+
+
 
 ## Take-aways
 
