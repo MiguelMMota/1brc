@@ -15,4 +15,11 @@ My take on the 1BRC challenge in Python.
 | Single lookup when updating station data | 2:42.68 | Read station data once and mutate it, instead of reading each element separately, which incurs multiple dict lookups | ✅ |
 | Set dict default value instead of checking if key is present | 2:30.51 | This saves us an additional lookup for each station, and a branching path | ✅ |
 | Swap order of operands | 2:35.04 | This might have resulted in optimisations by the JIT compiler | ❌ |
-| Replace `min()`/`max()` with `if` statements | ... | Avoid extra function call and memory allocations, and allow CPU to optimise branch paths that will rarely be taken  | ❌ |
+| Replace `min()`/`max()` with `if` statements | 2:35.85 | Avoid extra function call and memory allocations, and allow CPU to optimise branch paths that will rarely be taken  | ❌ |
+| Mutate objects in place | 2:31.88 | Avoid extra function call and memory allocations, and allow CPU to optimise branch paths that will rarely be taken  | ✅ |
+| Hoist list access | 2:39.06 | | ❌ |
+
+## Take-aways
+
+1. We don't get to do some optimisations on account of internal optimisations that pypy's JIT compiler already does. For example: swap order of operands, replacing `min()`/`max()` with branched paths that will frequently be skipped
+2. `perf` isn't very useful with pypy's JIT compiler because a lot of the code is already optimised and it's difficult to gather insights from the report
