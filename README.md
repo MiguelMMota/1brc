@@ -23,9 +23,9 @@ My take on the 1BRC challenge in Python.
 | Treat floats as ints | 1:55.12 | We're casting the temperature bytes to float every line, but we know the values follow a strict format. This allows us to treat them as ints, and convert back to single decimal place floats when printing results. | ✅ |
 | Implicitly skip the "." character | 1:45.30 | Instead of comparing each byte to the floating point character, iterate all bytes up to the last two, then add the last byte, which corresponding to the number after the decimal point | ✅ |
 | Store value directly in `temperature` instead of temporarily using `result` | 1:44.45 | This also includes a change to set the sign of `temperature` by multiplying it in place, instead of assigning from `result * sign`. Hard to say how much of the performance boost is due to noise, but it seems a sound change anyways | ✅ |
-| Initially temperature directly to the first digit's value, instead of 0 | 1:33.54 | This allows us to skip an iteration when we loop over the bytes. A separate measurement gave ~1:39, so measurements should be taken with an extra grain of salt from now on | ✅ |
-
-
+| Initialise temperature directly to the first digit's value, instead of 0 | 1:33.54 | This allows us to skip an iteration when we loop over the bytes. A separate measurement gave ~1:39, so measurements should be taken with an extra grain of salt from now on | ✅ |
+| Use arithmetic instead of if-statement to determine sign and offset | 1:32.39 | Since the first byte is always either b'-' (45) or b'0' - b'9' (48-57), we can determine the sign and offset with a series of arithmetic operations, removing a branch that is hard for the CPU to predict correctly (assuming there's a roughly equal amount of negative and positive temperatures in the dataset) | ✅ |
+| | | | |
 
 ## Take-aways
 

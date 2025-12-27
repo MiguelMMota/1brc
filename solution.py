@@ -44,15 +44,14 @@ def main() -> None:
                 semicolon_pos = line.find(b';')
                 station = line[:semicolon_pos]
                 
-                # Handle temperature as a sequence of bytes to avoid treating it as a float
                 temp_bytes = line[semicolon_pos+1:]
-                sign = 1
-                offset = 0
 
-                # TODO: can we rewrite this to omit the if-statement? And will that make a difference in performance?
-                if temp_bytes[0] == 45:  # ord(b'-')
-                    sign = -1
-                    offset = 1
+                # if the first byte is less than b'0' (i..e: it's b'-'), offset will be 1. Otherwise (i.e.: it's a digit, it will be 0)
+                offset = 1 - temp_bytes[0] // 48
+                # if the first byte is "-", offset is 1, and sign is 1-2=-1. If the first byte is a digit, offset is 0, and sign is 1-0=1
+                sign = 1 - 2 * offset
+                # NB: the alternative to the code above is adding an if-statement to check if the first byte is b'-', but we're likely to
+                # incur high penalties from CPU branch predicition, assuming the odds of the character being in the dataset are close to 50%
 
                 temperature = (temp_bytes[offset] - 48) * 10
 
