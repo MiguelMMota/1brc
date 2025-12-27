@@ -13,7 +13,7 @@ My take on the 1BRC challenge in Python.
 | Single function | 4:36.39 | 22.61% of the time was spent on _PyObject_MakeTpCall (calling Python functions). This is interpreter overhead, which we can minimise by using a single function, and fewer temporary variables |
 | Tuple of station data instead of dict | 3:26.75 | dict storage and lookups are slower than tuples because they require hashing the key |
 | Single lookup when updating station data | 2:42.68 | Read station data once and mutate it, instead of reading each element separately, which incurs multiple dict lookups |
-| | | |
+| Set dict default value instead of checking if key is present | 2:25.99 | This saves us an additional lookup for each station, and a branching path |
 | | | |
 | | | |
 | | | |

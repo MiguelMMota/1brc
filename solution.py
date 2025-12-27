@@ -15,13 +15,18 @@
 #
 
 # TODO: efficiency ideas:
-# 1. mmap
-# 2. Handle floats as ints
-# 3. Custom hashing
-# 4. Avoid branch predictions with high odds of failure
-# 5. SIMD
-# 6. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
-# 7. More efficient dict sorting?
+# 1. Read as byte data
+# 2. mmap
+# 3. Handle floats as ints
+# 4. Custom hashing
+# 5. Avoid branch predictions with high odds of failure
+# 6. SIMD
+# 7. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
+# 8. More efficient data aggregation and dict sorting?
+
+import math
+
+DEFAULT_STATION_DATUM = [-math.inf, math.inf, 0, 0]
 
 def main() -> None:
     data = {}
@@ -29,19 +34,12 @@ def main() -> None:
         for line in f:
             station, temperature = line.split(";")
             temperature = float(temperature)
-            if station in data:
-                entry = data[station]
-                entry[0] = min(temperature, entry[0])
-                entry[1] = max(temperature, entry[1])
-                entry[2] = temperature + entry[2]
-                entry[3] = entry[3] + 1
-            else:
-                data[station] = [
-                    temperature,
-                    temperature,
-                    temperature,
-                    1,
-                ]
+
+            entry = data.setdefault(station, DEFAULT_STATION_DATUM)
+            entry[0] = min(temperature, entry[0])
+            entry[1] = max(temperature, entry[1])
+            entry[2] = temperature + entry[2]
+            entry[3] = entry[3] + 1
 
     aggregate_data = {}
     for station, (_min, _max, _sum, _count) in data.items():
