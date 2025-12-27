@@ -75,7 +75,7 @@ def process_chunk(file_path, start_byte, end_byte):
                 entry[2] += temperature
                 entry[3] += 1
 
-    return data
+    return dict(data)  # need to convert back to dict, because the defaultdict lambda causes a pickling error
 
 
 def main():
