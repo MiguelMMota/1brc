@@ -20,6 +20,7 @@
 # 3. SIMD
 # 4. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
 # 5. More efficient data aggregation and dict sorting?
+# 6. Use string formatting to print ints as single decimal place floats instead of doing multiplication
 
 from collections import defaultdict
 import math
@@ -48,16 +49,17 @@ def main() -> None:
                 sign = 1
                 offset = 0
                 result = 0
+
+                # TODO: can we rewrite this omit the if-statement? And will that make a difference in performance?
                 if temp_bytes[0] == 45:  # ord(b'-')
                     sign = -1
                     offset = 1
 
-                for b in temp_bytes[offset:]:
-                    if b == 46:  # ord(b'.')
-                        continue
-                
-                    result *= 10
+                for b in temp_bytes[offset:-2]:
                     result += b - 48  # ord(b'0')
+                    result *= 10
+
+                result += temp_bytes[-1] - 48  # ord(b'0')
 
                 temperature = result * sign
 

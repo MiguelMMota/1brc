@@ -21,6 +21,7 @@ My take on the 1BRC challenge in Python.
 | mmap | 2:10.87 | | ✅ |
 | Only decode station name into utf-8 when aggregating results | 2:01.56 | We don't need to decode it every line | ✅ |
 | Treat floats as ints | 1:55.12 | We're casting the temperature bytes to float every line, but we know the values follow a strict format. This allows us to treat them as ints, and convert back to single decimal place floats when printing results. | ✅ |
+| Implicitly skip the "." character | 1:45.30 | Instead of comparing each byte to the floating point character, iterate all bytes up to the last two, then add the last byte, which corresponding to the number after the decimal point | ✅ |
 
 ## Take-aways
 
