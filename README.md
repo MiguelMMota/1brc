@@ -26,7 +26,7 @@ My take on the 1BRC challenge in Python.
 | Initialise temperature directly to the first digit's value, instead of 0 | 1:33.54 | This allows us to skip an iteration when we loop over the bytes. A separate measurement gave ~1:39, so measurements should be taken with an extra grain of salt from now on | ✅ |
 | Use arithmetic instead of if-statement to determine sign and offset | 1:32.39 | Since the first byte is always either b'-' (45) or b'0' - b'9' (48-57), we can determine the sign and offset with a series of arithmetic operations, removing a branch that is hard for the CPU to predict correctly (assuming there's a roughly equal amount of negative and positive temperatures in the dataset) | ✅ |
 | Use mm.readline | 1:08.49 | It's much faster than trying to find "\n" | ✅ |
-| | | | |
+| Parallelisation | 8.677 | My `CPU_COUNT` is 14 | ✅ |
 
 ## Take-aways
 

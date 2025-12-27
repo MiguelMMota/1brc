@@ -24,6 +24,7 @@ from collections import defaultdict
 from copy import deepcopy
 import math
 import mmap
+import multiprocessing
 import os
 
 
@@ -32,11 +33,17 @@ MMAP_PAGE_SIZE = os.sysconf("SC_PAGE_SIZE")
 DEFAULT_DATUM = [math.inf, -math.inf, 0, 0]
 
 
-def main() -> None:
+def process_chunk(file_path, start_byte, end_byte):
+    offset = (start_byte // MMAP_PAGE_SIZE) * MMAP_PAGE_SIZE
     data = defaultdict(lambda: deepcopy(DEFAULT_DATUM))
 
-    with open("measurements.txt", "r+b") as f:
-        with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+    with open(file_path, "rb") as file:
+        length = end_byte - offset
+
+        with mmap.mmap(
+            file.fileno(), length, access=mmap.ACCESS_READ, offset=offset
+        ) as mm:
+            mm.seek(start_byte - offset)
             for line in iter(mm.readline, b""):
                 semicolon_pos = line.find(b';')
                 station = line[:semicolon_pos]
@@ -67,6 +74,37 @@ def main() -> None:
                 entry[1] = max(temperature, entry[1])
                 entry[2] += temperature
                 entry[3] += 1
+
+    return data
+
+
+def main():
+    file_size_bytes = os.path.getsize("measurements.txt")
+    base_chunk_size = file_size_bytes // CPU_COUNT
+    chunks = []
+
+    with open("measurements.txt", "r+b") as f:
+        with mmap.mmap(
+            f.fileno(), length=0, access=mmap.ACCESS_READ
+        ) as mm:
+            start_byte = 0
+            for _ in range(CPU_COUNT):
+                # If mmaped_file.find(...) is -1 (b"\n") not found, mmap.find(...) + 1 will be 0, which will default to file_size_bytes
+                end_byte = mm.find(b"\n", min(start_byte + base_chunk_size, file_size_bytes)) + 1 or file_size_bytes
+                chunks.append(("measurements.txt", start_byte, end_byte))
+                start_byte = end_byte
+
+    with multiprocessing.Pool(processes=CPU_COUNT) as p:
+        results = p.starmap(process_chunk, chunks)
+
+    data = defaultdict(lambda: deepcopy(DEFAULT_DATUM))
+    for result in results:
+        for station, item in result.items():
+            entry = data[station]
+            entry[0] = min(item[0], entry[0])
+            entry[1] = max(item[1], entry[1])
+            entry[2] += item[2]
+            entry[3] += item[3]
 
     aggregate_data = {}
     for station, (_min, _max, _sum, _count) in data.items():
