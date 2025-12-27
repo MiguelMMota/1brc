@@ -12,7 +12,7 @@ My take on the 1BRC challenge in Python.
 | pypy3 | 6:26.15 | From this row on, all runs will be with pypy |
 | Single function | 4:36.39 | 22.61% of the time was spent on _PyObject_MakeTpCall (calling Python functions). This is interpreter overhead, which we can minimise by using a single function, and fewer temporary variables |
 | Tuple of station data instead of dict | 3:26.75 | dict storage and lookups are slower than tuples because they require hashing the key |
-| Handle floats as ints | | Since all temperatures are known to have exactly one decimal place, we can treat them as ints, which is faster than handling float operations, and divide by 10 when presenting results |
+| Single lookup when updating station data | 2:42.68 | Read station data once and mutate it, instead of reading each element separately, which incurs multiple dict lookups |
 | | | |
 | | | |
 | | | |

@@ -23,7 +23,6 @@
 # 6. "|".join(item) instead of f"{_min}|{_sum/_count:.1f}|{_max}"
 # 7. More efficient dict sorting?
 
-
 def main() -> None:
     data = {}
     with open("measurements.txt", "r") as f:
@@ -31,19 +30,18 @@ def main() -> None:
             station, temperature = line.split(";")
             temperature = float(temperature)
             if station in data:
-                data[station] = (
-                    min(temperature, data[station][0]),
-                    max(temperature, data[station][1]),
-                    temperature + data[station][2],
-                    data[station][3] + 1,
-                )
+                entry = data[station]
+                entry[0] = min(temperature, entry[0])
+                entry[1] = max(temperature, entry[1])
+                entry[2] = temperature + entry[2]
+                entry[3] = entry[3] + 1
             else:
-                data[station] = (
+                data[station] = [
                     temperature,
                     temperature,
                     temperature,
                     1,
-                )
+                ]
 
     aggregate_data = {}
     for station, (_min, _max, _sum, _count) in data.items():
