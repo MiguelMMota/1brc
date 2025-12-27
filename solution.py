@@ -25,17 +25,17 @@
 # 8. More efficient data aggregation and dict sorting?
 
 import math
+from collections import defaultdict
 
-DEFAULT_STATION_DATUM = [math.inf, -math.inf, 0, 0]
 
 def main() -> None:
-    data = {}
+    data = defaultdict(lambda: [math.inf, -math.inf, 0, 0])
     with open("measurements.txt", "r") as f:
         for line in f:
             station, temperature = line.split(";")
             temperature = float(temperature)
 
-            entry = data.setdefault(station, DEFAULT_STATION_DATUM)
+            entry = data[station]
             entry[0] = min(temperature, entry[0])
             entry[1] = max(temperature, entry[1])
             entry[2] = temperature + entry[2]
