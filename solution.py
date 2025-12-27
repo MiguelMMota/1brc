@@ -26,7 +26,7 @@
 
 import math
 
-DEFAULT_STATION_DATUM = [-math.inf, math.inf, 0, 0]
+DEFAULT_STATION_DATUM = [math.inf, -math.inf, 0, 0]
 
 def main() -> None:
     data = {}
